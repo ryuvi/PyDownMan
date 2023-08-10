@@ -1,9 +1,10 @@
 import threading
-import tkinter as tk
+import customtkinter as tk
 import requests
 import re
+import os
 
-class MainPage(tk.Tk):
+class MainPage(tk.CTk):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         height = 600
@@ -12,21 +13,23 @@ class MainPage(tk.Tk):
         self.geometry(f'{width}x{height}')
         
         self.link = tk.StringVar()
-        uLabel = tk.Label(self, text="Insert the url").pack()
-        url = tk.Entry(self, textvariable=self.link)
-        url.pack(fill='x')
+        uLabel = tk.CTkLabel(self, text="Insert the url").pack()
+        url = tk.CTkEntry(self, textvariable=self.link)
+        url.pack(fill='x', padx=10, pady=10)
         
         self.name = tk.StringVar()
-        fnLabel = tk.Label(self, text="Insert the file name (if empty, the url one will be used)").pack()
-        file_name = tk.Entry(self, textvariable=self.name)
-        file_name.pack(fill='x')
+        fnLabel = tk.CTkLabel(self, text="Insert the file name (if empty, the url one will be used)").pack()
+        file_name = tk.CTkEntry(self, textvariable=self.name)
+        file_name.pack(fill='x', padx=10, pady=10)
         
-        download_btn = tk.Button(self, text="Download", command=self.download)
+        download_btn = tk.CTkButton(self, text="Download", command=self.download)
         download_btn.pack()
     
     def download(self):
         if self.link.get() in ("", None):
             return -1
+        
+        self.check_download_folder()
 
         url = self.link.get()
         urls_ext = [".com",".org",".net",".int",".edu",".gov",".mil"]
@@ -40,6 +43,8 @@ class MainPage(tk.Tk):
                 if name not in urls_ext and name is not None:
                     name = section
                     break
+        else:
+            name = self.name.get()
 
         req = requests.head(url)
         
@@ -51,7 +56,7 @@ class MainPage(tk.Tk):
 
         number_of_threads = 4
         part = int(int(file_size) / number_of_threads)
-        fp = open(name, "wb")
+        fp = open(f"downloads/{name}", "wb")
         fp.write(b'\0' * file_size)
         fp.close()
 
@@ -78,31 +83,35 @@ class MainPage(tk.Tk):
             fp.seek(start)
             var = fp.tell()
             fp.write(r.content)
+            
+    def check_download_folder(self):
+        if not os.path.isdir("downloads/"):
+            os.mkdir("downloads")
 
 
-class Header(tk.Frame):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Add download
-        add_btn = tk.Button(self, text="+")
-        add_btn.pack(side=tk.LEFT)
-        # Resume download
-        res_btn = tk.Button(self, text=">")
-        res_btn.pack(side=tk.LEFT)
-        # Pause download
-        pas_btn = tk.Button(self, text="||")
-        pas_btn.pack(side=tk.LEFT)
-        # Delete download
-        del_btn = tk.Button(self, text="X")
-        del_btn.pack(side=tk.LEFT)
-        # Show in folder
-        swf_btn = tk.Button(self, text="Show")
-        swf_btn.pack(side=tk.LEFT)
+# class Header(tk.Frame):
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         # Add download
+#         add_btn = tk.Button(self, text="+")
+#         add_btn.pack(side=tk.LEFT)
+#         # Resume download
+#         res_btn = tk.Button(self, text=">")
+#         res_btn.pack(side=tk.LEFT)
+#         # Pause download
+#         pas_btn = tk.Button(self, text="||")
+#         pas_btn.pack(side=tk.LEFT)
+#         # Delete download
+#         del_btn = tk.Button(self, text="X")
+#         del_btn.pack(side=tk.LEFT)
+#         # Show in folder
+#         swf_btn = tk.Button(self, text="Show")
+#         swf_btn.pack(side=tk.LEFT)
 
 
-class List(tk.Frame):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+# class List(tk.Frame):
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
         
 
 
