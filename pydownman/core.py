@@ -24,6 +24,14 @@ class MainPage(tk.CTk):
         
         download_btn = tk.CTkButton(self, text="Download", command=self.download)
         download_btn.pack()
+        
+        add_btn = tk.CTkButton(self, text="+", command=self.open_add)
+        add_btn.place(relx=0.75, rely=0.75)
+    
+    def open_add(self):
+        add = AddLink()
+        self.link.set(add.get_url())
+        self.download()
     
     def download(self):
         if self.link.get() in ("", None):
@@ -56,9 +64,8 @@ class MainPage(tk.CTk):
 
         number_of_threads = 4
         part = int(int(file_size) / number_of_threads)
-        fp = open(f"downloads/{name}", "wb")
-        fp.write(b'\0' * file_size)
-        fp.close()
+        with open(f"downloads/{name}", "wb") as f:
+            f.write(b'\0' * file_size)
 
         for i in range(number_of_threads):
             start = part * i
@@ -88,6 +95,25 @@ class MainPage(tk.CTk):
         if not os.path.isdir("downloads/"):
             os.mkdir("downloads")
 
+
+class AddLink(tk.CTkToplevel):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.title("Adicionar")
+        
+        self.link = tk.StringVar()
+        entry = tk.CTkEntry(self, textvariable=self.link)
+        entry.pack(expand=True, fill='x')
+        
+        frame = tk.CTkFrame(self)
+        frame.pack(expand=True, fill='x')
+        cancel = tk.CTkButton(frame, text="Cancel", command=self.destroy)
+        cancel.pack(side=tk.RIGHT)
+        add = tk.CTkButton(frame, text="Ok", command=self.destroy)
+        add.pack(side=tk.RIGHT)
+    
+    def get_url(self):
+        return self.link.get()
 
 # class Header(tk.Frame):
 #     def __init__(self, *args, **kwargs):
